@@ -18,7 +18,10 @@ foreach ($output as $file) {
 	}
 
 	$lint_output = array();
+	$phpcs_output = array();
 	exec("php -l " . escapeshellarg($file), $lint_output, $return);
+	exec("phpcs --standard=WordPress-VIP " . escapeshellarg($file), $phpcs_output, $csreturn);
+	echo implode("\n", $phpcs_output), "\n";
 	if ($return == 0) {
 		continue;
 	}
