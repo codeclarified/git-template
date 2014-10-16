@@ -1,5 +1,7 @@
 #Pre-commit PHP Lint
 
+Requires phpcs and WordPress-VIP code standards: https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards
+
 * Create directory `mkdir ~/.git_template/hooks`
 * Place or symlink pre-commit in this directory
  * Make script executable `chmod +x pre-commit`
