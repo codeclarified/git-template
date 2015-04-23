@@ -1,0 +1,43 @@
+#!/usr/local/bin/php
+<?php
+
+$output = array();
+$return = 0;
+
+// Check if this is an empty repo, diff against empty tree if so,
+// diff against HEAD if this repo contains commits
+exec( 'git rev-parse --verify HEAD 2> /dev/null', $output, $return );
+$against = $return == 0 ? 'HEAD' : '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
+
+// Get the file names of any modified and staged files in repo
+exec( "git diff-index --cached --name-only {$against}", $output );
+
+$filename_pattern = '/\.php$/';
+$exit_status = 0;
+
+foreach ( $output as $file ) {
+	if ( !preg_match( $filename_pattern, $file ) ) {
+		// don't check files that aren't PHP
+		continue;
+	}
+
+	$lint_output = array();
+	$phpcs_output = array();
+
+	// Lint modified php files
+	exec( 'php -l ' . escapeshellarg( $file ), $lint_output, $return);
+
+	// Check modified php files agasinst WP VIP code standards
+	// TODO: Allow selection of phpcs standards libraries
+	exec( 'phpcs --standard=WordPress-VIP ' . escapeshellarg( $file ), $phpcs_output, $csreturn );
+	echo implode( "\n", $phpcs_output ), "\n";
+	if ( $return == 0 ) {
+		continue;
+	}
+
+	// Echo lint output on error, update exit status to reject commit
+	echo implode( "\n", $lint_output ), "\n";
+	$exit_status = 1;
+}
+
+exit( $exit_status );
